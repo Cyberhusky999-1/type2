@@ -1,12 +1,12 @@
-// Map keyboard keys to drum sound names. Beginners can add new pads by
-// adding a matching button in HTML and a new entry in this object.
-const drumSounds = {
-  A: 'kick',
-  S: 'snare',
-  D: 'hiHat',
-  F: 'lowTom',
-  G: 'clap',
-  H: 'cymbal',
+// Map keyboard keys to xylophone note names and frequencies. Beginners can add
+// another bar by adding a matching button in HTML and a new entry here.
+const xylophoneNotes = {
+  A: { name: 'C4', frequency: 261.63 },
+  S: { name: 'D4', frequency: 293.66 },
+  D: { name: 'E4', frequency: 329.63 },
+  F: { name: 'G4', frequency: 392.00 },
+  G: { name: 'A4', frequency: 440.00 },
+  H: { name: 'C5', frequency: 523.25 },
 };
 
 // The AudioContext is created lazily on the first keypress or click so the
@@ -17,33 +17,42 @@ function getAudioContext() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
+
   return audioContext;
 }
 
-// Helper function that creates a quick volume envelope. Envelopes keep sounds
-// smooth by fading them out instead of stopping them abruptly.
-function createEnvelope(context, startVolume, endTime) {
+// A xylophone sound starts with a quick mallet hit, then rings out briefly.
+// This helper builds that shape with a fast attack and a natural fade.
+function createMalletEnvelope(context, peakVolume, ringTime) {
   const gain = context.createGain();
-  gain.gain.setValueAtTime(startVolume, context.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + endTime);
+  const now = context.currentTime;
+
+  gain.gain.setValueAtTime(0.001, now);
+  gain.gain.exponentialRampToValueAtTime(peakVolume, now + 0.006);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + ringTime);
   gain.connect(context.destination);
+
   return gain;
 }
 
-function playKick(context) {
+function addTone(context, destination, frequency, startVolume, ringTime) {
   const oscillator = context.createOscillator();
-  const gain = createEnvelope(context, 1, 0.5);
+  const gain = context.createGain();
+  const now = context.currentTime;
 
   oscillator.type = 'sine';
-  oscillator.frequency.setValueAtTime(140, context.currentTime);
-  oscillator.frequency.exponentialRampToValueAtTime(45, context.currentTime + 0.5);
-  oscillator.connect(gain);
-  oscillator.start();
-  oscillator.stop(context.currentTime + 0.5);
+  oscillator.frequency.setValueAtTime(frequency, now);
+  gain.gain.setValueAtTime(startVolume, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + ringTime);
+
+  oscillator.connect(gain).connect(destination);
+  oscillator.start(now);
+  oscillator.stop(now + ringTime);
 }
 
-function playSnare(context) {
-  const noiseLength = context.sampleRate * 0.2;
+function addMalletClick(context, destination) {
+  // A tiny burst of filtered noise creates the wooden "tick" of the mallet.
+  const noiseLength = Math.floor(context.sampleRate * 0.018);
   const buffer = context.createBuffer(1, noiseLength, context.sampleRate);
   const samples = buffer.getChannelData(0);
 
@@ -53,98 +62,29 @@ function playSnare(context) {
 
   const noise = context.createBufferSource();
   const filter = context.createBiquadFilter();
-  const gain = createEnvelope(context, 0.55, 0.18);
+  const gain = context.createGain();
+  const now = context.currentTime;
 
   noise.buffer = buffer;
-  filter.type = 'highpass';
-  filter.frequency.value = 1200;
-  noise.connect(filter).connect(gain);
-  noise.start();
+  filter.type = 'bandpass';
+  filter.frequency.value = 1800;
+  gain.gain.setValueAtTime(0.16, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.018);
+
+  noise.connect(filter).connect(gain).connect(destination);
+  noise.start(now);
 }
 
-function playHiHat(context) {
-  const noiseLength = context.sampleRate * 0.08;
-  const buffer = context.createBuffer(1, noiseLength, context.sampleRate);
-  const samples = buffer.getChannelData(0);
+function playXylophoneNote(note) {
+  const context = getAudioContext();
+  const masterGain = createMalletEnvelope(context, 0.85, 1.15);
 
-  for (let i = 0; i < noiseLength; i += 1) {
-    samples[i] = Math.random() * 2 - 1;
-  }
-
-  const noise = context.createBufferSource();
-  const filter = context.createBiquadFilter();
-  const gain = createEnvelope(context, 0.35, 0.06);
-
-  noise.buffer = buffer;
-  filter.type = 'highpass';
-  filter.frequency.value = 7000;
-  noise.connect(filter).connect(gain);
-  noise.start();
+  // Xylophones are bright because the main note is mixed with quieter overtones.
+  addTone(context, masterGain, note.frequency, 0.8, 1.15);
+  addTone(context, masterGain, note.frequency * 3.01, 0.22, 0.55);
+  addTone(context, masterGain, note.frequency * 4.95, 0.10, 0.35);
+  addMalletClick(context, masterGain);
 }
-
-function playLowTom(context) {
-  const oscillator = context.createOscillator();
-  const gain = createEnvelope(context, 0.75, 0.38);
-
-  oscillator.type = 'sine';
-  oscillator.frequency.setValueAtTime(180, context.currentTime);
-  oscillator.frequency.exponentialRampToValueAtTime(80, context.currentTime + 0.38);
-  oscillator.connect(gain);
-  oscillator.start();
-  oscillator.stop(context.currentTime + 0.38);
-}
-
-function playClap(context) {
-  // A clap is simulated with three very short filtered noise bursts.
-  [0, 0.035, 0.07].forEach((delay) => {
-    const noiseLength = context.sampleRate * 0.06;
-    const buffer = context.createBuffer(1, noiseLength, context.sampleRate);
-    const samples = buffer.getChannelData(0);
-
-    for (let i = 0; i < noiseLength; i += 1) {
-      samples[i] = Math.random() * 2 - 1;
-    }
-
-    const noise = context.createBufferSource();
-    const filter = context.createBiquadFilter();
-    const gain = createEnvelope(context, 0.22, delay + 0.09);
-
-    noise.buffer = buffer;
-    filter.type = 'bandpass';
-    filter.frequency.value = 1800;
-    noise.connect(filter).connect(gain);
-    noise.start(context.currentTime + delay);
-  });
-}
-
-function playCymbal(context) {
-  const noiseLength = context.sampleRate * 0.9;
-  const buffer = context.createBuffer(1, noiseLength, context.sampleRate);
-  const samples = buffer.getChannelData(0);
-
-  for (let i = 0; i < noiseLength; i += 1) {
-    samples[i] = Math.random() * 2 - 1;
-  }
-
-  const noise = context.createBufferSource();
-  const filter = context.createBiquadFilter();
-  const gain = createEnvelope(context, 0.28, 0.85);
-
-  noise.buffer = buffer;
-  filter.type = 'highpass';
-  filter.frequency.value = 4500;
-  noise.connect(filter).connect(gain);
-  noise.start();
-}
-
-const soundPlayers = {
-  kick: playKick,
-  snare: playSnare,
-  hiHat: playHiHat,
-  lowTom: playLowTom,
-  clap: playClap,
-  cymbal: playCymbal,
-};
 
 function lightPad(key) {
   const pad = document.querySelector(`[data-key="${key}"]`);
@@ -156,35 +96,34 @@ function lightPad(key) {
   pad.classList.add('is-active');
   window.setTimeout(() => {
     pad.classList.remove('is-active');
-  }, 140);
+  }, 160);
 }
 
-function triggerDrum(key) {
+function triggerNote(key) {
   const upperKey = key.toUpperCase();
-  const soundName = drumSounds[upperKey];
+  const note = xylophoneNotes[upperKey];
 
-  if (!soundName) {
+  if (!note) {
     return;
   }
 
-  const context = getAudioContext();
-  soundPlayers[soundName](context);
+  playXylophoneNote(note);
   lightPad(upperKey);
 }
 
-// Keyboard events make the drums playable immediately without clicking a pad.
+// Keyboard events make the xylophone playable immediately without clicking a bar.
 document.addEventListener('keydown', (event) => {
-  // Ignore held-down repeats so one press creates one clean drum hit.
+  // Ignore held-down repeats so one press creates one clean note.
   if (event.repeat) {
     return;
   }
 
-  triggerDrum(event.key);
+  triggerNote(event.key);
 });
 
 // Clicking is optional, but it helps mouse and touch users try the app too.
 document.querySelectorAll('.pad').forEach((pad) => {
   pad.addEventListener('click', () => {
-    triggerDrum(pad.dataset.key);
+    triggerNote(pad.dataset.key);
   });
 });

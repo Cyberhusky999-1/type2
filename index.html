@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Browser Drum Pad</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow">Web Audio API Demo</p>
+      <h1 id="page-title">Keyboard Drum Pad</h1>
+      <p class="instructions">
+        Press the labeled keys on your keyboard to play distinct drum sounds instantly.
+        The matching pad will light up each time you strike it.
+      </p>
+    </section>
+
+    <section class="pad-grid" aria-label="Drum pads">
+      <button class="pad" data-key="A" type="button" aria-label="A key Kick drum">
+        <span class="pad-key">A</span>
+        <span class="pad-name">Kick</span>
+      </button>
+      <button class="pad" data-key="S" type="button" aria-label="S key Snare drum">
+        <span class="pad-key">S</span>
+        <span class="pad-name">Snare</span>
+      </button>
+      <button class="pad" data-key="D" type="button" aria-label="D key Hi-hat">
+        <span class="pad-key">D</span>
+        <span class="pad-name">Hi-hat</span>
+      </button>
+      <button class="pad" data-key="F" type="button" aria-label="F key Low tom">
+        <span class="pad-key">F</span>
+        <span class="pad-name">Low Tom</span>
+      </button>
+      <button class="pad" data-key="G" type="button" aria-label="G key Clap">
+        <span class="pad-key">G</span>
+        <span class="pad-name">Clap</span>
+      </button>
+      <button class="pad" data-key="H" type="button" aria-label="H key Cymbal">
+        <span class="pad-key">H</span>
+        <span class="pad-name">Cymbal</span>
+      </button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

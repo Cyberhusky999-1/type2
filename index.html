@@ -7,6 +7,14 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="floating-food" aria-hidden="true">
+      <span class="food food-apple">🍎</span>
+      <span class="food food-avocado">🥑</span>
+      <span class="food food-bowl">🥗</span>
+      <span class="food food-taco">🌮</span>
+      <span class="food food-berry">🫐</span>
+      <span class="food food-sushi">🍣</span>
+    </div>
     <main class="app-shell">
       <section class="hero" aria-labelledby="page-title">
         <div>
@@ -16,8 +24,13 @@
             Set a daily goal, log meals as you go, and keep an eye on your remaining calories.
             Your entries stay saved in this browser for today.
           </p>
+          <div class="hero-badges" aria-label="Tracker highlights">
+            <span>🍓 Colorful meals</span>
+            <span>🥦 Daily goals</span>
+            <span>✨ Saved progress</span>
+          </div>
         </div>
-        <div class="goal-card" aria-label="Daily calorie summary">
+        <div class="goal-card sparkle-card" aria-label="Daily calorie summary">
           <span>Remaining</span>
           <strong id="remainingCalories">0</strong>
           <small id="goalSummary">Set a goal to begin</small>

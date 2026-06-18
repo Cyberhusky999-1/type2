@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Calorie Counter</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="floating-food" aria-hidden="true">
+      <span class="food food-apple">🍎</span>
+      <span class="food food-avocado">🥑</span>
+      <span class="food food-bowl">🥗</span>
+      <span class="food food-taco">🌮</span>
+      <span class="food food-berry">🫐</span>
+      <span class="food food-sushi">🍣</span>
+    </div>
+    <main class="app-shell">
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Daily nutrition tracker</p>
+          <h1 id="page-title">Count your calories throughout the day</h1>
+          <p class="hero-copy">
+            Set a daily goal, log meals as you go, and keep an eye on your remaining calories.
+            Your entries stay saved in this browser for today.
+          </p>
+          <div class="hero-badges" aria-label="Tracker highlights">
+            <span>🍓 Colorful meals</span>
+            <span>🥦 Daily goals</span>
+            <span>✨ Saved progress</span>
+          </div>
+        </div>
+        <div class="goal-card sparkle-card" aria-label="Daily calorie summary">
+          <span>Remaining</span>
+          <strong id="remainingCalories">0</strong>
+          <small id="goalSummary">Set a goal to begin</small>
+        </div>
+      </section>
+
+      <section class="dashboard" aria-label="Calorie progress">
+        <article class="panel progress-panel">
+          <div class="panel-heading">
+            <h2>Today&apos;s progress</h2>
+            <button id="resetDay" class="ghost-button" type="button">Reset day</button>
+          </div>
+          <div class="progress-ring" role="img" aria-label="Calories eaten progress">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="track" cx="60" cy="60" r="52"></circle>
+              <circle id="progressCircle" class="progress" cx="60" cy="60" r="52"></circle>
+            </svg>
+            <div class="progress-copy">
+              <strong id="totalCalories">0</strong>
+              <span>calories eaten</span>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div>
+              <span>Goal</span>
+              <strong id="goalCalories">0</strong>
+            </div>
+            <div>
+              <span>Meals</span>
+              <strong id="mealCount">0</strong>
+            </div>
+            <div>
+              <span>Average</span>
+              <strong id="averageCalories">0</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel form-panel">
+          <h2>Log a meal or snack</h2>
+          <form id="mealForm">
+            <label>
+              Food name
+              <input id="foodName" name="foodName" type="text" placeholder="e.g. Greek yogurt" required />
+            </label>
+            <label>
+              Calories
+              <input id="foodCalories" name="foodCalories" type="number" min="1" step="1" placeholder="150" required />
+            </label>
+            <label>
+              Meal type
+              <select id="mealType" name="mealType">
+                <option>Breakfast</option>
+                <option>Lunch</option>
+                <option>Dinner</option>
+                <option>Snack</option>
+              </select>
+            </label>
+            <button class="primary-button" type="submit">Add entry</button>
+          </form>
+
+          <form id="goalForm" class="goal-form">
+            <label>
+              Daily calorie goal
+              <input id="dailyGoal" name="dailyGoal" type="number" min="1" step="1" placeholder="2000" />
+            </label>
+            <button class="secondary-button" type="submit">Save goal</button>
+          </form>
+
+          <form id="profileForm" class="profile-form">
+            <div>
+              <h3>Your details</h3>
+              <p>Add optional info to keep your tracker personalized.</p>
+            </div>
+            <div class="profile-fields">
+              <label>
+                Weight (lb)
+                <input id="weight" name="weight" type="number" min="1" step="0.1" placeholder="165" />
+              </label>
+              <label>
+                Age
+                <input id="age" name="age" type="number" min="1" max="120" step="1" placeholder="32" />
+              </label>
+              <label>
+                Height (in)
+                <input id="height" name="height" type="number" min="1" step="0.1" placeholder="68" />
+              </label>
+            </div>
+            <button class="secondary-button" type="submit">Save details</button>
+            <p id="profileSummary" class="profile-summary">Add weight, age, and height when you are ready.</p>
+          </form>
+        </article>
+      </section>
+
+
+      <section class="panel suggestions-panel" aria-labelledby="suggestions-title">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow mini-eyebrow">Meal inspiration</p>
+            <h2 id="suggestions-title">Foods to eat throughout the day</h2>
+          </div>
+          <span class="suggestion-note">Balanced ideas, not medical advice</span>
+        </div>
+        <div class="suggestion-grid">
+          <article class="suggestion-card breakfast-card">
+            <span class="suggestion-emoji" aria-hidden="true">🍳</span>
+            <p class="meal-time">Breakfast</p>
+            <h3>Eggs, oatmeal, and berries</h3>
+            <p>Protein from eggs helps you feel full, oats provide steady energy, and berries add fiber plus antioxidants.</p>
+          </article>
+          <article class="suggestion-card lunch-card">
+            <span class="suggestion-emoji" aria-hidden="true">🥗</span>
+            <p class="meal-time">Lunch</p>
+            <h3>Chicken quinoa salad</h3>
+            <p>Lean protein supports muscles, quinoa adds complex carbs, and colorful vegetables bring vitamins and minerals.</p>
+          </article>
+          <article class="suggestion-card snack-card">
+            <span class="suggestion-emoji" aria-hidden="true">🍎</span>
+            <p class="meal-time">Snack</p>
+            <h3>Apple with peanut butter</h3>
+            <p>The apple adds crunch and fiber while peanut butter contributes healthy fats that can help curb cravings.</p>
+          </article>
+          <article class="suggestion-card dinner-card">
+            <span class="suggestion-emoji" aria-hidden="true">🐟</span>
+            <p class="meal-time">Dinner</p>
+            <h3>Salmon, sweet potato, and broccoli</h3>
+            <p>Salmon provides omega-3 fats, sweet potato restores energy, and broccoli supports fiber and micronutrient intake.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel log-panel" aria-labelledby="log-title">
+        <div class="panel-heading">
+          <h2 id="log-title">Food log</h2>
+          <span id="todayDate"></span>
+        </div>
+        <ul id="foodLog" class="food-log"></ul>
+        <p id="emptyState" class="empty-state">No foods logged yet. Add your first meal above.</p>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

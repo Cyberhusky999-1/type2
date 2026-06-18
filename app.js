@@ -5,19 +5,20 @@ const state = loadState();
 const mealForm = document.querySelector('#mealForm');
 const goalForm = document.querySelector('#goalForm');
 const resetDay = document.querySelector('#resetDay');
+const profileForm = document.querySelector('#profileForm');
 const foodLog = document.querySelector('#foodLog');
 const emptyState = document.querySelector('#emptyState');
 const progressCircle = document.querySelector('#progressCircle');
 
 function loadState() {
-  const fallback = { date: todayKey, goal: 2000, entries: [] };
+  const fallback = { date: todayKey, goal: 2000, entries: [], profile: { weight: '', age: '', height: '' } };
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
 
   if (!saved || saved.date !== todayKey) {
     return fallback;
   }
 
-  return { ...fallback, ...saved };
+  return { ...fallback, ...saved, profile: { ...fallback.profile, ...saved.profile } };
 }
 
 function saveState() {
@@ -26,6 +27,15 @@ function saveState() {
 
 function formatCalories(value) {
   return Number(value).toLocaleString();
+}
+
+function formatProfileValue(value) {
+  return value ? Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 }) : '';
+}
+
+function calculateBmi(weight, height) {
+  if (!weight || !height) return null;
+  return (weight / (height * height)) * 703;
 }
 
 function updateDashboard() {
@@ -41,6 +51,9 @@ function updateDashboard() {
   document.querySelector('#mealCount').textContent = state.entries.length;
   document.querySelector('#averageCalories').textContent = formatCalories(average);
   document.querySelector('#dailyGoal').value = state.goal;
+  document.querySelector('#weight').value = state.profile.weight;
+  document.querySelector('#age').value = state.profile.age;
+  document.querySelector('#height').value = state.profile.height;
   document.querySelector('#todayDate').textContent = new Date().toLocaleDateString(undefined, {
     weekday: 'long',
     month: 'long',
@@ -51,8 +64,29 @@ function updateDashboard() {
     : `${formatCalories(Math.abs(remaining))} calories over goal`;
   progressCircle.style.strokeDashoffset = circumference - (circumference * progress);
   progressCircle.style.stroke = remaining >= 0 ? 'var(--brand)' : 'var(--danger)';
+  updateProfileSummary();
 
   renderEntries();
+}
+
+function updateProfileSummary() {
+  const { weight, age, height } = state.profile;
+  const summary = document.querySelector('#profileSummary');
+  const bmi = calculateBmi(Number(weight), Number(height));
+  const details = [];
+
+  if (weight) details.push(`${formatProfileValue(weight)} lb`);
+  if (age) details.push(`${age} years old`);
+  if (height) details.push(`${formatProfileValue(height)} in tall`);
+
+  if (!details.length) {
+    summary.textContent = 'Add weight, age, and height when you are ready.';
+    return;
+  }
+
+  summary.textContent = bmi
+    ? `${details.join(' • ')} • BMI ${bmi.toFixed(1)}`
+    : details.join(' • ');
 }
 
 function renderEntries() {
@@ -100,6 +134,20 @@ mealForm.addEventListener('submit', (event) => {
   });
 
   mealForm.reset();
+  saveState();
+  updateDashboard();
+});
+
+profileForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const formData = new FormData(profileForm);
+
+  state.profile = {
+    weight: formData.get('weight'),
+    age: formData.get('age'),
+    height: formData.get('height'),
+  };
+
   saveState();
   updateDashboard();
 });

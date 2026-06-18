@@ -239,3 +239,35 @@ input:focus, select:focus {
   .food-log li { grid-template-columns: 1fr; }
   h1 { font-size: 2.65rem; }
 }
+
+.profile-form {
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.profile-form h3 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.profile-form p {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.profile-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.profile-summary {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #fff3df;
+  font-weight: 800;
+}
+
+@media (max-width: 800px) {
+  .profile-fields { grid-template-columns: 1fr; }
+}
